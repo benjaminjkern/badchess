@@ -1,45 +1,10 @@
-import { GRID_SIZE } from "./constants.js";
-import { playMove, validMove } from "./game.js";
-
-const scramble = (list) => {
-    const newList = [...list];
-    for (let i = 0; i < list.length; i++) {
-        const r = Math.floor(Math.random() * list.length);
-        [newList[i], newList[r]] = [newList[r], newList[i]];
-    }
-    return newList;
-};
-
-export const getMoves = (turn, boardPieces) => {
-    const validMoves = [];
-    for (let sx = 0; sx < GRID_SIZE; sx++) {
-        for (let sy = 0; sy < GRID_SIZE; sy++) {
-            if (boardPieces[sy][sx] === "" || boardPieces[sy][sx][0] !== turn)
-                continue;
-            for (let tx = 0; tx < GRID_SIZE; tx++) {
-                for (let ty = 0; ty < GRID_SIZE; ty++) {
-                    if (
-                        validMove(
-                            {
-                                boardX: sx,
-                                boardY: sy,
-                                boardPiece: boardPieces[sy][sx],
-                            },
-                            {
-                                boardX: tx,
-                                boardY: ty,
-                                boardPiece: boardPieces[ty][tx],
-                            },
-                            boardPieces
-                        )
-                    )
-                        validMoves.push([sx, sy, tx, ty]);
-                }
-            }
-        }
-    }
-    return scramble(validMoves);
-};
+import {
+    findCheckmate,
+    getMoves,
+    getNextTurn,
+    playMove,
+    playSimulatedMove,
+} from "./game.js";
 
 // https://codereview.stackexchange.com/questions/255698/queue-with-o1-enqueue-and-dequeue-with-js-arrays
 function Queue() {
@@ -62,15 +27,6 @@ function Queue() {
     });
 }
 
-const playSimulatedMove = ([sx, sy, tx, ty], boardPieces) => {
-    const newBoardPieces = [...boardPieces];
-    newBoardPieces[ty] = [...newBoardPieces[ty]];
-    newBoardPieces[sy] = [...newBoardPieces[sy]];
-    newBoardPieces[ty][tx] = newBoardPieces[sy][sx];
-    newBoardPieces[sy][sx] = "";
-    return newBoardPieces;
-};
-
 const getRandomMove = (turn, boardPieces) => {
     const moves = getMoves(turn, boardPieces);
     return moves[Math.floor(Math.random() * moves.length)];
@@ -83,24 +39,25 @@ export const playEngineMove = (turn, boardPieces, redraw) => {
     redraw();
 };
 
-const getWorstMove = (turn, boardPieces) => {
+const getWorstMove = (turn, boardPieces, lookahead = 1) => {
     const list = new Queue();
-    list.enqueue([undefined, turn, boardPieces]);
+    list.enqueue([undefined, turn, boardPieces, 0]);
     while (list.peek()) {
-        const [originalMove, thisTurn, thisBoard] = list.dequeue();
+        const [originalMove, thisTurn, thisBoard, movesAhead] = list.dequeue();
+        if (movesAhead > lookahead) continue;
         const moves = getMoves(thisTurn, thisBoard);
-        const nextTurn = thisTurn === "W" ? "B" : "W";
+        const nextTurn = getNextTurn(thisTurn);
         while (moves.length) {
             const move = moves.pop();
             const nextBoard = playSimulatedMove(move, thisBoard);
-            if (
-                originalMove &&
-                nextBoard.every((row) =>
-                    row.every((piece) => piece !== `${turn}K`)
-                )
-            )
+            if (originalMove && findCheckmate(turn, nextBoard))
                 return originalMove;
-            list.enqueue([originalMove ?? move, nextTurn, nextBoard]);
+            list.enqueue([
+                originalMove ?? move,
+                nextTurn,
+                nextBoard,
+                movesAhead + 1,
+            ]);
         }
     }
 };
