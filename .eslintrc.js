@@ -11,4 +11,8 @@ module.exports = {
         node: true,
     },
     ignorePatterns: ["**/*.html"],
+    rules: {
+        "no-unused-vars": "warn",
+        "no-warning-comments": "warn",
+    },
 };
