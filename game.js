@@ -20,6 +20,19 @@ export const drawSelectedPiece = (ctx) => {
 };
 
 export const playMove = ([sx, sy, tx, ty], boardPieces) => {
+    console.log(
+        boardPieces[sy][sx],
+        "(",
+        sx,
+        sy,
+        ")",
+        "->",
+        boardPieces[ty][tx],
+        "(",
+        tx,
+        ty,
+        ")"
+    );
     boardPieces[ty][tx] = boardPieces[sy][sx];
     boardPieces[sy][sx] = "";
     nextTurn();
