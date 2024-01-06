@@ -229,7 +229,7 @@ export const getMoves = (turn, boardPieces, requireNoChecks = true) => {
             }
         }
     }
-    return validMoves;
+    return scramble(validMoves);
 };
 
 export const findCheck = (turn, boardPieces) => {

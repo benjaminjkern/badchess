@@ -39,12 +39,18 @@ export const playEngineMove = (turn, boardPieces, redraw) => {
     redraw();
 };
 
-const getWorstMove = (turn, boardPieces, lookahead = 2) => {
+const getWorstMove = (turn, boardPieces, lookahead = 4) => {
     console.log("getWorstMove");
     const list = new Queue();
+    // const list = [];
+    // list.push([undefined, turn, boardPieces, 0]);
     list.enqueue([undefined, turn, boardPieces, 0]);
+    // while (list.length) {
     while (list.peek()) {
+        // const [originalMove, thisTurn, thisBoard, movesAhead] = list.pop();
         const [originalMove, thisTurn, thisBoard, movesAhead] = list.dequeue();
+
+        if (originalMove && findCheckmate(turn, thisBoard)) return originalMove;
         // console.log(originalMove, movesAhead);
         if (movesAhead >= lookahead) continue;
         const moves = getMoves(thisTurn, thisBoard);
@@ -53,8 +59,12 @@ const getWorstMove = (turn, boardPieces, lookahead = 2) => {
             const move = moves.pop();
             // console.log(move);
             const nextBoard = playSimulatedMove(move, thisBoard);
-            if (originalMove && findCheckmate(turn, nextBoard))
-                return originalMove;
+            // list.push([
+            //     originalMove ?? move,
+            //     nextTurn,
+            //     nextBoard,
+            //     movesAhead + 1,
+            // ]);
             list.enqueue([
                 originalMove ?? move,
                 nextTurn,
