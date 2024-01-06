@@ -2,9 +2,9 @@ import { drawBoard } from "./board.js";
 import { TOTAL_SIZE } from "./constants.js";
 import { drawBoardPieces, startPiecesToBoardPieces } from "./pieces.js";
 import "./game.js";
-import { setupBoardControls } from "./game.js";
+import { drawSelectedPiece, setupBoardControls } from "./game.js";
 
-let canvas, ctx;
+let canvas, ctx, boardPieces;
 
 window.onload = () => {
     canvas = document.getElementById("canvas");
@@ -12,13 +12,14 @@ window.onload = () => {
     canvas.width = TOTAL_SIZE;
     canvas.height = TOTAL_SIZE;
 
-    const boardPieces = startPiecesToBoardPieces();
-    drawBoard(ctx);
-    drawBoardPieces(ctx, boardPieces);
-    setupBoardControls(boardPieces, () => {
-        drawBoard(ctx);
-        drawBoardPieces(ctx, boardPieces);
-    });
+    boardPieces = startPiecesToBoardPieces();
+    setupBoardControls(boardPieces, drawEverything);
+
+    drawEverything();
 };
 
-const drawEverything = (ctx, boardPieces) => {};
+const drawEverything = () => {
+    drawBoard(ctx);
+    drawBoardPieces(ctx, boardPieces);
+    drawSelectedPiece(ctx);
+};
