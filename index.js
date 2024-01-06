@@ -1,5 +1,6 @@
 import { drawBoard } from "./board.js";
 import { TOTAL_SIZE } from "./constants.js";
+import { drawBoardPieces, startPiecesToBoardPieces } from "./pieces.js";
 
 let canvas, ctx;
 
@@ -10,4 +11,7 @@ window.onload = () => {
     canvas.height = TOTAL_SIZE;
 
     drawBoard(ctx);
+
+    const boardPieces = startPiecesToBoardPieces();
+    drawBoardPieces(ctx, boardPieces);
 };
