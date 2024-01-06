@@ -39,16 +39,19 @@ export const playEngineMove = (turn, boardPieces, redraw) => {
     redraw();
 };
 
-const getWorstMove = (turn, boardPieces, lookahead = 1) => {
+const getWorstMove = (turn, boardPieces, lookahead = 2) => {
+    console.log("getWorstMove");
     const list = new Queue();
     list.enqueue([undefined, turn, boardPieces, 0]);
     while (list.peek()) {
         const [originalMove, thisTurn, thisBoard, movesAhead] = list.dequeue();
-        if (movesAhead > lookahead) continue;
+        // console.log(originalMove, movesAhead);
+        if (movesAhead >= lookahead) continue;
         const moves = getMoves(thisTurn, thisBoard);
         const nextTurn = getNextTurn(thisTurn);
         while (moves.length) {
             const move = moves.pop();
+            // console.log(move);
             const nextBoard = playSimulatedMove(move, thisBoard);
             if (originalMove && findCheckmate(turn, nextBoard))
                 return originalMove;
@@ -60,4 +63,6 @@ const getWorstMove = (turn, boardPieces, lookahead = 1) => {
             ]);
         }
     }
+    console.log("Playing random move");
+    return getRandomMove(turn, boardPieces);
 };

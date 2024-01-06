@@ -14,8 +14,14 @@ window.onload = () => {
     canvas.height = TOTAL_SIZE;
 
     boardPieces = startPiecesToBoardPieces();
-    setupBoardControls(boardPieces, drawEverything, (turn) =>
-        playEngineMove(turn, boardPieces, drawEverything)
+    setupBoardControls(
+        boardPieces,
+        drawEverything,
+        // (turn) => {}
+        (turn, gameOver) => {
+            if (gameOver) console.log("GAME OVER");
+            else playEngineMove(turn, boardPieces, drawEverything);
+        }
     );
 
     drawEverything();

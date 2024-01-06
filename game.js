@@ -67,7 +67,11 @@ export const setupBoardControls = (boardPieces, redraw, afterMoveCallback) => {
                         ],
                         boardPieces
                     );
-                    afterMoveCallback(currentTurn);
+
+                    afterMoveCallback(
+                        currentTurn,
+                        findCheckmate(currentTurn, boardPieces)
+                    );
                 }
                 pieceSelected = undefined;
             }
@@ -225,20 +229,15 @@ export const getMoves = (turn, boardPieces, requireNoChecks = true) => {
             }
         }
     }
-    return scramble(validMoves);
+    return validMoves;
 };
 
 export const findCheck = (turn, boardPieces) => {
     const nextTurn = getNextTurn(turn);
     const moves = getMoves(nextTurn, boardPieces, false);
 
-    for (const move of moves) {
-        const nextBoard = playSimulatedMove(move, boardPieces);
-
-        if (
-            nextBoard.every((row) => row.every((piece) => piece !== `${turn}K`))
-        )
-            return true;
+    for (const [sx, sy, tx, ty] of moves) {
+        if (boardPieces[ty][tx] === `${turn}K`) return true;
     }
     return false;
 };
