@@ -19,7 +19,13 @@ export const drawSelectedPiece = (ctx) => {
     ctx.stroke();
 };
 
-export const setupBoardControls = (boardPieces, redraw) => {
+export const playMove = ([sx, sy, tx, ty], boardPieces) => {
+    boardPieces[ty][tx] = boardPieces[sy][sx];
+    boardPieces[sy][sx] = "";
+    nextTurn();
+};
+
+export const setupBoardControls = (boardPieces, redraw, afterMoveCallback) => {
     window.onclick = (e) => {
         const boardX = Math.floor(e.x / SQUARE_SIZE);
         const boardY = Math.floor(e.y / SQUARE_SIZE);
@@ -33,19 +39,31 @@ export const setupBoardControls = (boardPieces, redraw) => {
             if (boardPiece[0] === currentTurn && boardPiece !== "")
                 pieceSelected = newSpace;
         } else {
-            if (validMove(pieceSelected, newSpace, boardPieces)) {
-                boardPieces[pieceSelected.boardY][pieceSelected.boardX] = "";
-                boardPieces[boardY][boardX] = pieceSelected.boardPiece;
-                nextTurn();
+            if (pieceSelected.boardPiece[0] === newSpace.boardPiece[0])
+                pieceSelected = newSpace;
+            else {
+                if (validMove(pieceSelected, newSpace, boardPieces)) {
+                    playMove(
+                        [
+                            pieceSelected.boardX,
+                            pieceSelected.boardY,
+                            boardX,
+                            boardY,
+                        ],
+                        boardPieces
+                    );
+                    afterMoveCallback(currentTurn);
+                }
+                pieceSelected = undefined;
             }
-            pieceSelected = undefined;
         }
         redraw();
     };
 };
 
-const validMove = (fromSpace, toSpace, boardPieces) => {
+export const validMove = (fromSpace, toSpace, boardPieces) => {
     if (toSpace.boardPiece[0] === fromSpace.boardPiece[0]) return false;
+
     const yDiff = toSpace.boardY - fromSpace.boardY;
     const xDiff = toSpace.boardX - fromSpace.boardX;
 

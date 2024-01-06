@@ -3,6 +3,7 @@ import { TOTAL_SIZE } from "./constants.js";
 import { drawBoardPieces, startPiecesToBoardPieces } from "./pieces.js";
 import "./game.js";
 import { drawSelectedPiece, setupBoardControls } from "./game.js";
+import { playRandomMove } from "./engine.js";
 
 let canvas, ctx, boardPieces;
 
@@ -13,7 +14,9 @@ window.onload = () => {
     canvas.height = TOTAL_SIZE;
 
     boardPieces = startPiecesToBoardPieces();
-    setupBoardControls(boardPieces, drawEverything);
+    setupBoardControls(boardPieces, drawEverything, (turn) =>
+        playRandomMove(turn, boardPieces, drawEverything)
+    );
 
     drawEverything();
 };
