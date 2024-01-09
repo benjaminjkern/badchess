@@ -126,24 +126,6 @@ export const validMove = ([sx, sy, tx, ty], board, requireNoChecks = true) => {
     return !findCheck({ turn: board.turn, pieces: nextBoard.pieces });
 };
 
-export const playSimulatedMovesFromMovesString = (movesString, board) => {
-    const newBoard = {
-        turn:
-            (movesString.length / 4) % 2 === 0
-                ? board.turn
-                : getNextTurn(board.turn),
-        pieces: board.pieces.map((row) => [...row]), // TODO: Probably dont need to copy all of it
-    };
-
-    for (let i = 0; i < movesString.length / 4; i++) {
-        const [sx, sy, tx, ty] = movesString.slice(i * 4, i * 4 + 4).split("");
-        newBoard.pieces[ty][tx] = newBoard.pieces[sy][sx];
-        newBoard.pieces[sy][sx] = "";
-    }
-
-    return newBoard;
-};
-
 export const playSimulatedMove = ([sx, sy, tx, ty], board) => {
     const newBoard = {
         turn: getNextTurn(board.turn),
@@ -156,37 +138,7 @@ export const playSimulatedMove = ([sx, sy, tx, ty], board) => {
     return newBoard;
 };
 
-const scramble = (list) => {
-    const newList = [...list];
-    for (let i = 0; i < list.length; i++) {
-        const r = Math.floor(Math.random() * list.length);
-        [newList[i], newList[r]] = [newList[r], newList[i]];
-    }
-    return newList;
-};
-
-// TODO: Generator function???
-export const getMoves = (board, requireNoChecks = true) => {
-    const validMoves = [];
-    for (let sx = 0; sx < GRID_SIZE; sx++) {
-        for (let sy = 0; sy < GRID_SIZE; sy++) {
-            if (
-                board.pieces[sy][sx] === "" ||
-                board.pieces[sy][sx][0] !== board.turn
-            )
-                continue;
-            for (let tx = 0; tx < GRID_SIZE; tx++) {
-                for (let ty = 0; ty < GRID_SIZE; ty++) {
-                    if (validMove([sx, sy, tx, ty], board, requireNoChecks))
-                        validMoves.push([sx, sy, tx, ty]);
-                }
-            }
-        }
-    }
-    return scramble(validMoves);
-};
-
-function* getMovesGenerator(board, requireNoChecks = true) {
+export function* getMovesGenerator(board, requireNoChecks = true) {
     for (let sx = 0; sx < GRID_SIZE; sx++) {
         for (let sy = 0; sy < GRID_SIZE; sy++) {
             if (
@@ -203,6 +155,17 @@ function* getMovesGenerator(board, requireNoChecks = true) {
         }
     }
 }
+
+export const getMoves = (board, requireNoChecks = true) => {
+    const moves = getMovesGenerator(board, requireNoChecks);
+    const list = [];
+    let item = moves.next();
+    while (!item.done) {
+        list.push(item.value);
+        item = moves.next();
+    }
+    return list;
+};
 
 export const findCheck = (board) => {
     const nextTurn = getNextTurn(board.turn);
@@ -221,17 +184,7 @@ export const findCheck = (board) => {
 
 export const findGameEnd = (board) => {
     const movesGenerator = getMovesGenerator(board);
-
-    let noMoves = true;
-    while (true) {
-        const move = movesGenerator.next().value;
-        if (!move) {
-            if (noMoves) {
-                noMoves = false;
-                return findCheck(board) || null;
-            }
-            return true;
-        }
-        if (!findCheck(playSimulatedMove(move, board))) return false;
-    }
+    const move = movesGenerator.next().value;
+    if (move) return false;
+    return findCheck(board) || null;
 };

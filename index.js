@@ -27,16 +27,16 @@ window.onload = () => {
     canvas.width = TOTAL_SIZE;
     canvas.height = TOTAL_SIZE;
 
-    // setTimeout(() => {
-    //     let time = 0;
-    //     for (let i = 0; i <= 10; i++) {
-    //         console.log(i);
-    //         const start = new Date().getTime();
-    //         getWorstMove(currentBoard);
-    //         time += new Date().getTime() - start;
-    //     }
-    //     console.log(time);
-    // }, 3000);
+    setTimeout(() => {
+        let time = 0;
+        for (let i = 0; i <= 10; i++) {
+            console.log(i);
+            const start = new Date().getTime();
+            getWorstMove(currentBoard);
+            time += new Date().getTime() - start;
+        }
+        console.log(time);
+    }, 3000);
 
     drawEverything();
 };

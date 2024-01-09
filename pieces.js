@@ -11,6 +11,10 @@ WPWPWPWPWPWPWPWP
 WRWNWBWQWKWBWNWR
 `;
 
+export const boardPiecesTo = (boardPieces) => {
+    return `\n${boardPieces.map((row) => row.join("")).join("\n")}\n`;
+};
+
 export const startPiecesToBoardPieces = (startPieces = START_PIECES) => {
     return startPieces
         .split("\n")

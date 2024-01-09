@@ -1,9 +1,10 @@
 import {
     findGameEnd,
     getMoves,
+    getMovesGenerator,
     playSimulatedMove,
-    playSimulatedMovesFromMovesString,
 } from "./game.js";
+import { boardPiecesToString, startPiecesToBoardPieces } from "./pieces.js";
 
 // https://codereview.stackexchange.com/questions/255698/queue-with-o1-enqueue-and-dequeue-with-js-arrays
 function Queue() {
@@ -31,46 +32,18 @@ export const getRandomMove = (board) => {
     return moves[Math.floor(Math.random() * moves.length)];
 };
 
-// 9094 (11 times)
-export const getWorstMoveStrings = (board, lookahead = 3) => {
+export const getWorstMove = (board, lookahead = 3) => {
     const list = new Queue();
 
-    list.enqueue("");
+    list.enqueue([null, null, boardPiecesToString(board.pieces), 0]);
     while (list.peek() !== undefined) {
-        const movesString = list.dequeue();
+        const [originalMove, thisMove, thisBoardString, movesAhead] =
+            list.dequeue();
 
-        const boardAfterMoves = playSimulatedMovesFromMovesString(
-            movesString,
-            board
-        );
-        if (findGameEnd(boardAfterMoves))
-            return movesString
-                .slice(0, 4)
-                .split("")
-                .map((x) => Number(x));
-
-        if (movesString.length / 4 >= lookahead) continue;
-
-        const nextPossibleMoves = getMoves(boardAfterMoves);
-
-        while (nextPossibleMoves.length) {
-            const move = nextPossibleMoves.pop();
-            list.enqueue(movesString + move.join(""));
-        }
-    }
-    console.log("Playing random move");
-    return getRandomMove(board);
-};
-
-// 7674 (11 times)
-// 7822 (11 times)
-// 7690 (11 times)
-export const getWorstMove = (board, lookahead = 4) => {
-    const list = new Queue();
-
-    list.enqueue([null, null, board, 0]);
-    while (list.peek() !== undefined) {
-        const [originalMove, thisMove, thisBoard, movesAhead] = list.dequeue();
+        const thisBoard = {
+            turn: movesAhead === 0 || movesAhead % 2 === 0 ? "W" : "B",
+            pieces: startPiecesToBoardPieces(thisBoardString),
+        };
 
         let boardAfterMove = board;
         if (thisMove) {
@@ -80,16 +53,17 @@ export const getWorstMove = (board, lookahead = 4) => {
 
         if (movesAhead >= lookahead) continue;
 
-        const nextPossibleMoves = getMoves(thisBoard);
+        const nextPossibleMoves = getMovesGenerator(boardAfterMove);
 
-        while (nextPossibleMoves.length) {
-            const move = nextPossibleMoves.pop();
+        let move = nextPossibleMoves.next().value;
+        while (move) {
             list.enqueue([
                 originalMove ?? move,
                 move,
-                boardAfterMove,
+                boardPiecesToString(boardAfterMove.pieces),
                 movesAhead + 1,
             ]);
+            move = nextPossibleMoves.next().value;
         }
     }
     console.log("Playing random move");
