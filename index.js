@@ -39,6 +39,17 @@ window.onload = () => {
     // }, 3000);
 
     drawEverything();
+    playEngineMove();
+};
+
+const playEngineMove = () => {
+    setTimeout(() => {
+        const result = playMove(getWorstMove(currentBoardState));
+        if (result.draw) alert("DRAW");
+        if (result.winner) alert(result.winner + " WINS");
+        drawEverything();
+        playEngineMove();
+    }, 3000);
 };
 
 window.onclick = (e) => {
@@ -49,15 +60,8 @@ window.onclick = (e) => {
         pieceSelected = [boardX, boardY];
     } else {
         const result = playMove([...pieceSelected, boardX, boardY]);
-        if (result.draw) console.log("DRAW");
-        if (result.winner) console.log(result.winner, "WINS");
-        if (result.nextTurn === "B")
-            setTimeout(() => {
-                const result = playMove(getWorstMove(currentBoardState));
-                if (result.draw) console.log("DRAW");
-                if (result.winner) console.log(result.winner, "WINS");
-                drawEverything();
-            }, 1);
+        if (result.draw) alert("DRAW");
+        if (result.winner) alert(result.winner + " WINS");
         pieceSelected = undefined;
     }
     drawEverything();

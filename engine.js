@@ -53,11 +53,17 @@ const randomListFrontier = () => {
 };
 
 export const getWorstMove = (boardState, lookahead = 0) => {
-    const list = randomListFrontier();
+    let list = randomListFrontier();
+    let nextList = randomListFrontier();
 
     list.add([null, null, gridToString(boardState.board.grid), 0]);
 
-    while (!list.isEmpty()) {
+    while (true) {
+        if (list.isEmpty()) {
+            if (nextList.isEmpty()) break;
+            list = nextList;
+            nextList = randomListFrontier();
+        }
         const [originalMove, thisMove, thisPieceString, movesAhead] =
             list.getNext();
 
@@ -72,19 +78,23 @@ export const getWorstMove = (boardState, lookahead = 0) => {
                 turn: currentTurn,
                 board: pieceStringToBoard(thisPieceString),
             };
+
+            if (Math.random() * 10000 < 1)
+                console.log(originalMove, thisMove, thisBoardState, movesAhead);
+
             boardAfterMove = playSimulatedMove(thisMove, thisBoardState);
-            if (
-                currentTurn !== boardState.turn &&
-                findGameEnd(boardAfterMove)
-            ) {
-                console.log(
-                    "Found checkmate",
-                    movesAhead,
-                    "moves away",
-                    originalMove,
-                    boardAfterMove
-                );
-                return originalMove;
+            if (findGameEnd(boardAfterMove)) {
+                if (currentTurn !== boardState.turn) {
+                    console.log(
+                        "Found checkmate",
+                        movesAhead,
+                        "moves away",
+                        originalMove,
+                        boardAfterMove
+                    );
+                    return originalMove;
+                }
+                continue;
             }
         }
 
@@ -94,7 +104,7 @@ export const getWorstMove = (boardState, lookahead = 0) => {
 
         let move = nextPossibleMoves.next().value;
         while (move) {
-            list.add([
+            nextList.add([
                 originalMove ?? move,
                 move,
                 gridToString(boardAfterMove.board.grid),
