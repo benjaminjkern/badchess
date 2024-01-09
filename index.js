@@ -69,7 +69,7 @@ const engineMove = () => {
         thinking = false;
         thinkingDiv.style.opacity = 0;
         drawEverything();
-    }, 1);
+    }, 1000);
 };
 
 const doMove = (move) => {
