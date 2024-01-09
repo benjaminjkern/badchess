@@ -61,10 +61,9 @@ export const getWorstMove = (boardState, lookahead = 0) => {
     let lookedAt = 0;
 
     while (true) {
-        if (lookedAt >= 100000) break;
         lookedAt++;
         if (list.isEmpty()) {
-            if (nextList.isEmpty()) break;
+            if (lookedAt < 100000 && nextList.isEmpty()) break;
             list = nextList;
             nextList = randomListFrontier();
         }
@@ -108,7 +107,7 @@ export const getWorstMove = (boardState, lookahead = 0) => {
 
         let move = nextPossibleMoves.next().value;
         while (move) {
-            nextList.add([
+            (lookedAt < 100000 ? nextList : list).add([
                 originalMove ?? move,
                 move,
                 gridToString(boardAfterMove.board.grid),
