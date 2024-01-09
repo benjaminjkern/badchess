@@ -39,7 +39,7 @@ export const playEngineMove = (turn, boardPieces, redraw) => {
     redraw();
 };
 
-const getWorstMove = (turn, boardPieces, lookahead = 4) => {
+const getWorstMove = (turn, boardPieces, lookahead = 2) => {
     console.log("getWorstMove");
     const list = new Queue();
     // const list = [];
