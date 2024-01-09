@@ -13,10 +13,10 @@ export const drawBoard = () => {
         for (let y = 0; y < GRID_SIZE; y++) {
             ctx.fillStyle = (x + y) % 2 ? color2 : color1;
             ctx.fillRect(
-                x * SQUARE_SIZE,
-                y * SQUARE_SIZE,
-                SQUARE_SIZE,
-                SQUARE_SIZE
+                Math.floor(x * SQUARE_SIZE),
+                Math.floor(y * SQUARE_SIZE),
+                SQUARE_SIZE + 1,
+                SQUARE_SIZE + 1
             );
         }
     }

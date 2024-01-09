@@ -52,7 +52,7 @@ const randomListFrontier = () => {
     };
 };
 
-export const getWorstMove = (boardState, lookahead = 4) => {
+export const getWorstMove = (boardState, lookahead = 0) => {
     let list = queueFrontier();
 
     list.add([null, null, gridToString(boardState.board.grid), 0]);
