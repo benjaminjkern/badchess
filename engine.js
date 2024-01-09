@@ -33,14 +33,33 @@ export const getRandomMove = (board) => {
     return moves[Math.floor(Math.random() * moves.length)];
 };
 
-export const getWorstMove = (boardState, lookahead = 4) => {
+const queueFrontier = () => {
     const list = new Queue();
+    return {
+        isEmpty: () => list.peek() === undefined,
+        getNext: (...args) => list.dequeue(...args),
+        add: (...args) => list.enqueue(...args),
+    };
+};
 
-    list.enqueue([null, null, gridToString(boardState.board.grid), 0]);
+const randomListFrontier = () => {
+    const list = [];
+    return {
+        isEmpty: () => list.length === 0,
+        getNext: () =>
+            list.splice(Math.floor(Math.random() * list.length), 1)[0],
+        add: (...args) => list.push(...args),
+    };
+};
 
-    while (list.peek()) {
+export const getWorstMove = (boardState, lookahead = 0) => {
+    const list = randomListFrontier();
+
+    list.add([null, null, gridToString(boardState.board.grid), 0]);
+
+    while (!list.isEmpty()) {
         const [originalMove, thisMove, thisPieceString, movesAhead] =
-            list.dequeue();
+            list.getNext();
 
         let boardAfterMove = boardState;
 
@@ -69,13 +88,13 @@ export const getWorstMove = (boardState, lookahead = 4) => {
             }
         }
 
-        if (movesAhead >= lookahead) continue;
+        if (lookahead && movesAhead >= lookahead) continue;
 
         const nextPossibleMoves = getMovesGenerator(boardAfterMove);
 
         let move = nextPossibleMoves.next().value;
         while (move) {
-            list.enqueue([
+            list.add([
                 originalMove ?? move,
                 move,
                 gridToString(boardAfterMove.board.grid),
