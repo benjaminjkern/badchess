@@ -63,7 +63,7 @@ export const getWorstMove = (boardState, lookahead = 0) => {
     while (true) {
         lookedAt++;
         if (list.isEmpty()) {
-            if (lookedAt < 100000 && nextList.isEmpty()) break;
+            if (lookedAt < 10000 && nextList.isEmpty()) break;
             list = nextList;
             nextList = randomListFrontier();
         }
