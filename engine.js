@@ -54,16 +54,15 @@ const randomListFrontier = () => {
 
 export const getWorstMove = (boardState, lookahead = 0) => {
     let list = randomListFrontier();
-    let nextList = randomListFrontier();
 
     list.add([null, null, gridToString(boardState.board.grid), 0]);
 
-    while (true) {
-        if (list.isEmpty()) {
-            if (nextList.isEmpty()) break;
-            list = nextList;
-            nextList = randomListFrontier();
-        }
+    while (!list.isEmpty()) {
+        // if (list.isEmpty()) {
+        //     if (nextList.isEmpty()) break;
+        //     list = nextList;
+        //     nextList = randomListFrontier();
+        // }
         const [originalMove, thisMove, thisPieceString, movesAhead] =
             list.getNext();
 
@@ -104,7 +103,7 @@ export const getWorstMove = (boardState, lookahead = 0) => {
 
         let move = nextPossibleMoves.next().value;
         while (move) {
-            nextList.add([
+            list.add([
                 originalMove ?? move,
                 move,
                 gridToString(boardAfterMove.board.grid),

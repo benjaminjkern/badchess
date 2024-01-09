@@ -1,5 +1,5 @@
 import { drawBoard } from "./board.js";
-import { SQUARE_SIZE, TOTAL_SIZE } from "./constants.js";
+import { SQUARE_SIZE, TOTAL_SIZE, setSize } from "./constants.js";
 import { getWorstMove } from "./engine.js";
 import { currentBoardState, drawCurrentBoard, playMove } from "./game.js";
 
@@ -24,6 +24,8 @@ const drawSelectedPiece = (ctx) => {
 window.onload = () => {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
+
+    setSize(Math.min(window.innerWidth, window.innerHeight));
     canvas.width = TOTAL_SIZE;
     canvas.height = TOTAL_SIZE;
 
@@ -40,6 +42,12 @@ window.onload = () => {
 
     drawEverything();
     playEngineMove();
+};
+window.onresize = () => {
+    setSize(Math.min(window.innerWidth, window.innerHeight));
+    canvas.width = TOTAL_SIZE;
+    canvas.height = TOTAL_SIZE;
+    drawEverything();
 };
 
 const playEngineMove = () => {

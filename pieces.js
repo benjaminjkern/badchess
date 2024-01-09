@@ -33,18 +33,40 @@ export const pieceStringToBoard = (pieceString = START_PIECES) => {
     return board;
 };
 
+const getPieceColor = (piece) => (piece[0] === "B" ? "black" : "white");
+const getPieceType = (piece) => {
+    switch (piece[1]) {
+        case "P":
+            return "pawn";
+        case "N":
+            return "knight";
+        case "K":
+            return "king";
+        case "Q":
+            return "queen";
+        case "R":
+            return "rook";
+        case "B":
+            return "bishop";
+    }
+};
+
 export const drawBoardPieces = (ctx, boardPieces) => {
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "center";
+    const drawImage = (image, x, y) => {
+        ctx.drawImage(
+            image,
+            x * SQUARE_SIZE,
+            y * SQUARE_SIZE,
+            SQUARE_SIZE,
+            SQUARE_SIZE
+        );
+    };
     for (const {
         piece,
         pos: [x, y],
     } of boardPieces) {
-        ctx.fillStyle = piece[0] === "B" ? "#000" : "#fff";
-        ctx.fillText(
-            piece,
-            x * SQUARE_SIZE + SQUARE_SIZE / 2,
-            y * SQUARE_SIZE + SQUARE_SIZE / 2
-        );
+        const image = new Image(SQUARE_SIZE, SQUARE_SIZE);
+        image.onload = () => drawImage(image, x, y);
+        image.src = `${getPieceColor(piece)}-${getPieceType(piece)}.png`;
     }
 };
