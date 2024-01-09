@@ -2,9 +2,10 @@ import {
     findGameEnd,
     getMoves,
     getMovesGenerator,
+    getNextTurn,
     playSimulatedMove,
 } from "./game.js";
-import { boardPiecesToString, startPiecesToBoardPieces } from "./pieces.js";
+import { gridToString, pieceStringToBoard } from "./pieces.js";
 
 // https://codereview.stackexchange.com/questions/255698/queue-with-o1-enqueue-and-dequeue-with-js-arrays
 function Queue() {
@@ -32,23 +33,40 @@ export const getRandomMove = (board) => {
     return moves[Math.floor(Math.random() * moves.length)];
 };
 
-export const getWorstMove = (board, lookahead = 3) => {
+export const getWorstMove = (boardState, lookahead = 6) => {
     const list = new Queue();
 
-    list.enqueue([null, null, boardPiecesToString(board.pieces), 0]);
-    while (list.peek() !== undefined) {
-        const [originalMove, thisMove, thisBoardString, movesAhead] =
+    list.enqueue([null, null, gridToString(boardState.board.grid), 0]);
+
+    while (list.peek()) {
+        const [originalMove, thisMove, thisPieceString, movesAhead] =
             list.dequeue();
 
-        const thisBoard = {
-            turn: movesAhead === 0 || movesAhead % 2 === 0 ? "W" : "B",
-            pieces: startPiecesToBoardPieces(thisBoardString),
-        };
+        let boardAfterMove = boardState;
 
-        let boardAfterMove = board;
         if (thisMove) {
-            boardAfterMove = playSimulatedMove(thisMove, thisBoard);
-            if (findGameEnd(boardAfterMove)) return originalMove;
+            const currentTurn =
+                movesAhead % 2 === 0
+                    ? getNextTurn(boardState.turn)
+                    : boardState.turn;
+            const thisBoardState = {
+                turn: currentTurn,
+                board: pieceStringToBoard(thisPieceString),
+            };
+            boardAfterMove = playSimulatedMove(thisMove, thisBoardState);
+            if (
+                currentTurn !== boardState.turn &&
+                findGameEnd(boardAfterMove)
+            ) {
+                console.log(
+                    "Found checkmate",
+                    movesAhead,
+                    "moves away",
+                    originalMove,
+                    boardAfterMove
+                );
+                return originalMove;
+            }
         }
 
         if (movesAhead >= lookahead) continue;
@@ -60,12 +78,12 @@ export const getWorstMove = (board, lookahead = 3) => {
             list.enqueue([
                 originalMove ?? move,
                 move,
-                boardPiecesToString(boardAfterMove.pieces),
+                gridToString(boardAfterMove.board.grid),
                 movesAhead + 1,
             ]);
             move = nextPossibleMoves.next().value;
         }
     }
     console.log("Playing random move");
-    return getRandomMove(board);
+    return getRandomMove(boardState);
 };

@@ -1,7 +1,7 @@
 import { drawBoard } from "./board.js";
 import { GRID_SIZE, SQUARE_SIZE, TOTAL_SIZE } from "./constants.js";
 import { getWorstMove } from "./engine.js";
-import { currentBoard, drawCurrentBoard, playMove } from "./game.js";
+import { currentBoardState, drawCurrentBoard, playMove } from "./game.js";
 
 let canvas, ctx;
 
@@ -27,16 +27,16 @@ window.onload = () => {
     canvas.width = TOTAL_SIZE;
     canvas.height = TOTAL_SIZE;
 
-    setTimeout(() => {
-        let time = 0;
-        for (let i = 0; i <= 10; i++) {
-            console.log(i);
-            const start = new Date().getTime();
-            getWorstMove(currentBoard);
-            time += new Date().getTime() - start;
-        }
-        console.log(time);
-    }, 3000);
+    // setTimeout(() => {
+    //     let time = 0;
+    //     for (let i = 0; i <= 10; i++) {
+    //         console.log(i);
+    //         const start = new Date().getTime();
+    //         getWorstMove(currentBoard);
+    //         time += new Date().getTime() - start;
+    //     }
+    //     console.log(time);
+    // }, 3000);
 
     drawEverything();
 };
@@ -55,7 +55,9 @@ window.onclick = (e) => {
         if (result.winner) console.log(result.winner, "WINS");
         if (result.nextTurn === "B")
             setTimeout(() => {
-                playMove(getWorstMove(currentBoard));
+                const result = playMove(getWorstMove(currentBoardState));
+                if (result.draw) console.log("DRAW");
+                if (result.winner) console.log(result.winner, "WINS");
                 drawEverything();
             }, 1);
         pieceSelected = undefined;

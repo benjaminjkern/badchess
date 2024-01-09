@@ -11,34 +11,40 @@ WPWPWPWPWPWPWPWP
 WRWNWBWQWKWBWNWR
 `;
 
-export const boardPiecesTo = (boardPieces) => {
-    return `\n${boardPieces.map((row) => row.join("")).join("\n")}\n`;
+export const gridToString = (grid) => {
+    return `\n${grid
+        .map((row) => row.map(({ piece }) => piece || "  ").join(""))
+        .join("\n")}\n`;
 };
 
-export const startPiecesToBoardPieces = (startPieces = START_PIECES) => {
-    return startPieces
-        .split("\n")
-        .slice(1, -1)
-        .map((row) => {
-            const returnArray = [];
-            for (let i = 0; i < GRID_SIZE; i++) {
-                returnArray.push(row.slice(i * 2, i * 2 + 2));
-            }
-            return returnArray;
-        });
+export const pieceStringToBoard = (pieceString = START_PIECES) => {
+    const board = { grid: [], pieces: [] };
+    for (const [y, row] of pieceString.split("\n").slice(1, -1).entries()) {
+        const rowArray = [];
+        for (let x = 0; x < GRID_SIZE; x++) {
+            const rawPiece = row.slice(x * 2, x * 2 + 2);
+            const piece = rawPiece === "  " ? "" : rawPiece;
+            const pieceObject = { piece, pos: [x, y] };
+            if (piece !== "") pieceObject.id = board.pieces.push(pieceObject);
+            rowArray.push(pieceObject);
+        }
+        board.grid.push(rowArray);
+    }
+    return board;
 };
 
 export const drawBoardPieces = (ctx, boardPieces) => {
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
-    for (const [y, row] of boardPieces.entries()) {
-        for (const [x, piece] of row.entries()) {
-            ctx.fillStyle = piece[0] === "B" ? "#000" : "#fff";
-            ctx.fillText(
-                piece,
-                x * SQUARE_SIZE + SQUARE_SIZE / 2,
-                y * SQUARE_SIZE + SQUARE_SIZE / 2
-            );
-        }
+    for (const {
+        piece,
+        pos: [x, y],
+    } of boardPieces) {
+        ctx.fillStyle = piece[0] === "B" ? "#000" : "#fff";
+        ctx.fillText(
+            piece,
+            x * SQUARE_SIZE + SQUARE_SIZE / 2,
+            y * SQUARE_SIZE + SQUARE_SIZE / 2
+        );
     }
 };
