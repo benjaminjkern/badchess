@@ -88,19 +88,22 @@ const engineLoop = () => {
     }, 3000);
 };
 
-window.onclick = window.ontouchstart = (e) => {
+const onClick = (e) => {
+    event.preventDefault();
+    const screenX = e.x ?? e.touches[0]?.clientX;
+    const screenY = e.y ?? e.touches[0]?.clientY;
     if (thinking) return;
     let boardX, boardY;
     if (window.innerWidth < window.innerHeight) {
-        boardX = Math.floor(e.x / SQUARE_SIZE);
+        boardX = Math.floor(screenX / SQUARE_SIZE);
         boardY = Math.floor(
-            (e.y - window.innerHeight / 2 + TOTAL_SIZE / 2) / SQUARE_SIZE
+            (screenY - window.innerHeight / 2 + TOTAL_SIZE / 2) / SQUARE_SIZE
         );
     } else {
         boardX = Math.floor(
-            (e.x - window.innerWidth / 2 + TOTAL_SIZE / 2) / SQUARE_SIZE
+            (screenX - window.innerWidth / 2 + TOTAL_SIZE / 2) / SQUARE_SIZE
         );
-        boardY = Math.floor(e.y / SQUARE_SIZE);
+        boardY = Math.floor(screenY / SQUARE_SIZE);
     }
 
     if (!pieceSelected) {
@@ -113,6 +116,9 @@ window.onclick = window.ontouchstart = (e) => {
     }
     drawEverything();
 };
+
+window.onclick = onClick;
+window.addEventListener("touchstart", onClick, { passive: false });
 
 const drawEverything = () => {
     drawCurrentBoard();
