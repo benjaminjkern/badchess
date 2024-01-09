@@ -50,6 +50,8 @@ window.onload = async () => {
     drawEverything();
     // engineLoop();
     thinkingDiv = document.getElementById("thinking");
+
+    if (Math.random() < 0.5) engineMove();
 };
 window.onresize = async () => {
     setSize(Math.min(window.innerWidth, window.innerHeight));
@@ -59,10 +61,22 @@ window.onresize = async () => {
     drawEverything();
 };
 
+const engineMove = () => {
+    thinking = true;
+    thinkingDiv.style.opacity = 1;
+    setTimeout(() => {
+        doMove(getWorstMove(currentBoardState));
+        thinking = false;
+        thinkingDiv.style.opacity = 0;
+        drawEverything();
+    }, 1);
+};
+
 const doMove = (move) => {
     const result = playMove(move);
     if (result.draw) alert("DRAW");
-    if (result.winner) alert(result.winner + " WINS");
+    if (result.winner)
+        alert((result.winner === "W" ? "White" : "Black") + " WINS");
     return !result.nextTurn;
 };
 
@@ -93,14 +107,7 @@ window.onclick = (e) => {
         pieceSelected = [boardX, boardY];
     } else {
         if (!doMove([...pieceSelected, boardX, boardY])) {
-            thinking = true;
-            thinkingDiv.style.opacity = 1;
-            setTimeout(() => {
-                doMove(getWorstMove(currentBoardState));
-                thinking = false;
-                thinkingDiv.style.opacity = 0;
-                drawEverything();
-            }, 1);
+            engineMove();
         }
         pieceSelected = undefined;
     }
