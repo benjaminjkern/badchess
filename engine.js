@@ -58,7 +58,7 @@ export const getWorstMove = (boardState, lookahead = 4) => {
 
     list.add([null, null, gridToString(boardState.board.grid), 0]);
 
-    while (!list.isEmpty()) {
+    while (true) {
         if (list.isEmpty()) {
             if (nextList.isEmpty()) break;
             list = nextList;
