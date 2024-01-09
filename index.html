@@ -2,14 +2,23 @@
 
 <head>
     <script src="index.js" type="module"></script>
+    <style>
+        #thinking {
+            opacity: 0;
+            font-size: 25vw;
+            position: absolute;
+            transform: translateX(-50%) translateY(-50%);
+            transition: opacity 1s ease-in-out;
+        }
+    </style>
 </head>
 
 <body style="margin: 0; cursor: pointer; display: flex; justify-content: center; align-items: center;">
     <div style="position:relative;">
-        <canvas style="position: absolute; top: 0; transform: translateX(-50%) translateY(-50%)" id="board"></canvas>
-        <canvas style="position: absolute; top: 0; transform: translateX(-50%) translateY(-50%)"
-            id="selectedpiece"></canvas>
-        <canvas style="position: absolute; top: 0; transform: translateX(-50%) translateY(-50%)" id="pieces"></canvas>
+        <canvas style="position: absolute; transform: translateX(-50%) translateY(-50%)" id="board"></canvas>
+        <canvas style="position: absolute; transform: translateX(-50%) translateY(-50%)" id="selectedpiece"></canvas>
+        <canvas style="position: absolute; transform: translateX(-50%) translateY(-50%)" id="pieces"></canvas>
+        <div id="thinking">🤔</div>
     </div>
 </body>
 

@@ -27,6 +27,9 @@ const drawSelectedPiece = () => {
     ctx.stroke();
 };
 
+let thinking = false,
+    thinkingDiv;
+
 window.onload = async () => {
     setSize(Math.min(window.innerWidth, window.innerHeight));
 
@@ -46,6 +49,7 @@ window.onload = async () => {
     drawBoard();
     drawEverything();
     // engineLoop();
+    thinkingDiv = document.getElementById("thinking");
 };
 window.onresize = async () => {
     setSize(Math.min(window.innerWidth, window.innerHeight));
@@ -71,15 +75,30 @@ const engineLoop = () => {
 };
 
 window.onclick = (e) => {
-    const boardX = Math.floor(e.x / SQUARE_SIZE);
-    const boardY = Math.floor(e.y / SQUARE_SIZE);
+    if (thinking) return;
+    let boardX, boardY;
+    if (window.innerWidth < window.innerHeight) {
+        boardX = Math.floor(e.x / SQUARE_SIZE);
+        boardY = Math.floor(
+            (e.y - window.innerHeight / 2 + TOTAL_SIZE / 2) / SQUARE_SIZE
+        );
+    } else {
+        boardX = Math.floor(
+            (e.x - window.innerWidth / 2 + TOTAL_SIZE / 2) / SQUARE_SIZE
+        );
+        boardY = Math.floor(e.y / SQUARE_SIZE);
+    }
 
     if (!pieceSelected) {
         pieceSelected = [boardX, boardY];
     } else {
         if (!doMove([...pieceSelected, boardX, boardY])) {
+            thinking = true;
+            thinkingDiv.style.opacity = 1;
             setTimeout(() => {
                 doMove(getWorstMove(currentBoardState));
+                thinking = false;
+                thinkingDiv.style.opacity = 0;
                 drawEverything();
             }, 1);
         }
