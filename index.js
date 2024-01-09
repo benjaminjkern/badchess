@@ -88,7 +88,7 @@ const engineLoop = () => {
     }, 3000);
 };
 
-window.onclick = window.ontouchend = (e) => {
+window.onclick = window.ontouchstart = (e) => {
     if (thinking) return;
     let boardX, boardY;
     if (window.innerWidth < window.innerHeight) {
