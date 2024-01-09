@@ -1,6 +1,7 @@
 import { drawBoard } from "./board.js";
 import { SQUARE_SIZE, TOTAL_SIZE } from "./constants.js";
-import { drawCurrentBoard, playMove } from "./game.js";
+import { getWorstMove } from "./engine.js";
+import { currentBoard, drawCurrentBoard, playMove } from "./game.js";
 
 let canvas, ctx;
 
@@ -26,11 +27,6 @@ window.onload = () => {
     canvas.width = TOTAL_SIZE;
     canvas.height = TOTAL_SIZE;
 
-    // (turn, gameState) => {
-    //     if (gameOver) console.log("GAME OVER");
-    //     else playEngineMove(turn, boardPieces, drawEverything);
-    // };
-
     drawEverything();
 };
 
@@ -44,6 +40,7 @@ window.onclick = (e) => {
         const result = playMove([...pieceSelected, boardX, boardY]);
         if (result.draw) console.log("DRAW");
         if (result.winner) console.log(result.winner, "WINS");
+        if (result.nextTurn === "B") playMove(getWorstMove(currentBoard));
         pieceSelected = undefined;
     }
     drawEverything();

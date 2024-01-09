@@ -1,14 +1,8 @@
-import {
-    findCheckmate,
-    getMoves,
-    getNextTurn,
-    playMove,
-    playSimulatedMove,
-} from "./game.js";
+import { findGameEnd, getMoves, playSimulatedMoves } from "./game.js";
 
 // https://codereview.stackexchange.com/questions/255698/queue-with-o1-enqueue-and-dequeue-with-js-arrays
 function Queue() {
-    var head, tail;
+    let head, tail;
     return Object.freeze({
         enqueue(value) {
             const link = { value, next: undefined };
@@ -27,52 +21,42 @@ function Queue() {
     });
 }
 
-const getRandomMove = (turn, boardPieces) => {
-    const moves = getMoves(turn, boardPieces);
+export const getRandomMove = (board) => {
+    const moves = getMoves(board);
     return moves[Math.floor(Math.random() * moves.length)];
 };
 
-export const playEngineMove = (turn, boardPieces, redraw) => {
-    const move = getWorstMove(turn, boardPieces);
-    playMove(move, boardPieces);
-
-    redraw();
-};
-
-const getWorstMove = (turn, boardPieces, lookahead = 2) => {
-    console.log("getWorstMove");
-    const list = new Queue();
+export const getWorstMove = (board, lookahead = 3) => {
     // const list = [];
-    // list.push([undefined, turn, boardPieces, 0]);
-    list.enqueue([undefined, turn, boardPieces, 0]);
-    // while (list.length) {
-    while (list.peek()) {
-        // const [originalMove, thisTurn, thisBoard, movesAhead] = list.pop();
-        const [originalMove, thisTurn, thisBoard, movesAhead] = list.dequeue();
+    const list = new Queue();
 
-        if (originalMove && findCheckmate(turn, thisBoard)) return originalMove;
-        // console.log(originalMove, movesAhead);
-        if (movesAhead >= lookahead) continue;
-        const moves = getMoves(thisTurn, thisBoard);
-        const nextTurn = getNextTurn(thisTurn);
-        while (moves.length) {
-            const move = moves.pop();
-            // console.log(move);
-            const nextBoard = playSimulatedMove(move, thisBoard);
-            // list.push([
-            //     originalMove ?? move,
-            //     nextTurn,
-            //     nextBoard,
-            //     movesAhead + 1,
-            // ]);
-            list.enqueue([
-                originalMove ?? move,
-                nextTurn,
-                nextBoard,
-                movesAhead + 1,
-            ]);
+    // list.push('');
+    list.enqueue("");
+    // while (list.length) {
+    while (list.peek() !== undefined) {
+        // const moves = list.pop();
+        const movesString = list.dequeue();
+        const moves = movesString
+            .split("")
+            .map((x) => Number(x))
+            .reduce((p, c, i) => {
+                if (i % 4 === 0) return [...p, [c]];
+                return [...p.slice(0, -1), [...p[p.length - 1], c]];
+            }, []);
+
+        const boardAfterMoves = playSimulatedMoves(moves, board);
+        if (findGameEnd(boardAfterMoves)) return moves[0];
+
+        if (moves.length >= lookahead) continue;
+
+        const nextPossibleMoves = getMoves(boardAfterMoves);
+
+        while (nextPossibleMoves.length) {
+            const move = nextPossibleMoves.pop();
+            // list.push(movesString + move.join(''));
+            list.enqueue(movesString + move.join(""));
         }
     }
     console.log("Playing random move");
-    return getRandomMove(turn, boardPieces);
+    return getRandomMove(board);
 };

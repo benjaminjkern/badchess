@@ -1,7 +1,7 @@
 import { GRID_SIZE } from "./constants.js";
 import { drawBoardPieces, startPiecesToBoardPieces } from "./pieces.js";
 
-let currentBoard = { pieces: startPiecesToBoardPieces(), turn: "W" };
+export let currentBoard = { pieces: startPiecesToBoardPieces(), turn: "W" };
 
 export const drawCurrentBoard = (ctx) => {
     drawBoardPieces(ctx, currentBoard.pieces);
@@ -34,7 +34,7 @@ export const playMove = ([sx, sy, tx, ty]) => {
     if (gameOver) return { winner: getNextTurn(currentBoard.turn) };
     if (gameOver === null) return { draw: true };
 
-    return {};
+    return { nextTurn: currentBoard.turn };
 };
 
 export const validMove = ([sx, sy, tx, ty], board, requireNoChecks = true) => {
@@ -124,6 +124,20 @@ export const validMove = ([sx, sy, tx, ty], board, requireNoChecks = true) => {
 
     // Check for check
     return !findCheck({ turn: board.turn, pieces: nextBoard.pieces });
+};
+
+export const playSimulatedMoves = (moves, board) => {
+    const newBoard = {
+        turn: moves.length % 2 === 0 ? board.turn : getNextTurn(board.turn),
+        pieces: board.pieces.map((row) => [...row]), // TODO: Probably dont need to copy all of it
+    };
+
+    for (const [sx, sy, tx, ty] of moves) {
+        newBoard.pieces[ty][tx] = newBoard.pieces[sy][sx];
+        newBoard.pieces[sy][sx] = "";
+    }
+
+    return newBoard;
 };
 
 export const playSimulatedMove = ([sx, sy, tx, ty], board) => {
