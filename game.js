@@ -126,13 +126,17 @@ export const validMove = ([sx, sy, tx, ty], board, requireNoChecks = true) => {
     return !findCheck({ turn: board.turn, pieces: nextBoard.pieces });
 };
 
-export const playSimulatedMoves = (moves, board) => {
+export const playSimulatedMovesFromMovesString = (movesString, board) => {
     const newBoard = {
-        turn: moves.length % 2 === 0 ? board.turn : getNextTurn(board.turn),
+        turn:
+            (movesString.length / 4) % 2 === 0
+                ? board.turn
+                : getNextTurn(board.turn),
         pieces: board.pieces.map((row) => [...row]), // TODO: Probably dont need to copy all of it
     };
 
-    for (const [sx, sy, tx, ty] of moves) {
+    for (let i = 0; i < movesString.length / 4; i++) {
+        const [sx, sy, tx, ty] = movesString.slice(i * 4, i * 4 + 4).split("");
         newBoard.pieces[ty][tx] = newBoard.pieces[sy][sx];
         newBoard.pieces[sy][sx] = "";
     }
@@ -182,21 +186,52 @@ export const getMoves = (board, requireNoChecks = true) => {
     return scramble(validMoves);
 };
 
+function* getMovesGenerator(board, requireNoChecks = true) {
+    for (let sx = 0; sx < GRID_SIZE; sx++) {
+        for (let sy = 0; sy < GRID_SIZE; sy++) {
+            if (
+                board.pieces[sy][sx] === "" ||
+                board.pieces[sy][sx][0] !== board.turn
+            )
+                continue;
+            for (let tx = 0; tx < GRID_SIZE; tx++) {
+                for (let ty = 0; ty < GRID_SIZE; ty++) {
+                    if (validMove([sx, sy, tx, ty], board, requireNoChecks))
+                        yield [sx, sy, tx, ty];
+                }
+            }
+        }
+    }
+}
+
 export const findCheck = (board) => {
     const nextTurn = getNextTurn(board.turn);
-    const moves = getMoves({ turn: nextTurn, pieces: board.pieces }, false);
+    const movesGenerator = getMovesGenerator(
+        { turn: nextTurn, pieces: board.pieces },
+        false
+    );
 
-    for (const [sx, sy, tx, ty] of moves) {
+    while (true) {
+        const move = movesGenerator.next().value;
+        if (!move) return false;
+        const [sx, sy, tx, ty] = move;
         if (board.pieces[ty][tx] === `${board.turn}K`) return true;
     }
-    return false;
 };
 
 export const findGameEnd = (board) => {
-    const moves = getMoves(board);
-    if (moves.length === 0) return findCheck(board) || null;
+    const movesGenerator = getMovesGenerator(board);
 
-    return moves.every((move) => {
-        return findCheck(playSimulatedMove(move, board));
-    });
+    let noMoves = true;
+    while (true) {
+        const move = movesGenerator.next().value;
+        if (!move) {
+            if (noMoves) {
+                noMoves = false;
+                return findCheck(board) || null;
+            }
+            return true;
+        }
+        if (!findCheck(playSimulatedMove(move, board))) return false;
+    }
 };

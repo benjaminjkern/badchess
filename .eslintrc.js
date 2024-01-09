@@ -14,5 +14,6 @@ module.exports = {
     rules: {
         "no-unused-vars": "warn",
         "no-warning-comments": "warn",
+        "no-constant-condition": "off",
     },
 };

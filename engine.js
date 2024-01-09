@@ -1,4 +1,9 @@
-import { findGameEnd, getMoves, playSimulatedMoves } from "./game.js";
+import {
+    findGameEnd,
+    getMoves,
+    playSimulatedMove,
+    playSimulatedMovesFromMovesString,
+} from "./game.js";
 
 // https://codereview.stackexchange.com/questions/255698/queue-with-o1-enqueue-and-dequeue-with-js-arrays
 function Queue() {
@@ -26,35 +31,65 @@ export const getRandomMove = (board) => {
     return moves[Math.floor(Math.random() * moves.length)];
 };
 
-export const getWorstMove = (board, lookahead = 3) => {
-    // const list = [];
+// 9094 (11 times)
+export const getWorstMoveStrings = (board, lookahead = 3) => {
     const list = new Queue();
 
-    // list.push('');
     list.enqueue("");
-    // while (list.length) {
     while (list.peek() !== undefined) {
-        // const moves = list.pop();
         const movesString = list.dequeue();
-        const moves = movesString
-            .split("")
-            .map((x) => Number(x))
-            .reduce((p, c, i) => {
-                if (i % 4 === 0) return [...p, [c]];
-                return [...p.slice(0, -1), [...p[p.length - 1], c]];
-            }, []);
 
-        const boardAfterMoves = playSimulatedMoves(moves, board);
-        if (findGameEnd(boardAfterMoves)) return moves[0];
+        const boardAfterMoves = playSimulatedMovesFromMovesString(
+            movesString,
+            board
+        );
+        if (findGameEnd(boardAfterMoves))
+            return movesString
+                .slice(0, 4)
+                .split("")
+                .map((x) => Number(x));
 
-        if (moves.length >= lookahead) continue;
+        if (movesString.length / 4 >= lookahead) continue;
 
         const nextPossibleMoves = getMoves(boardAfterMoves);
 
         while (nextPossibleMoves.length) {
             const move = nextPossibleMoves.pop();
-            // list.push(movesString + move.join(''));
             list.enqueue(movesString + move.join(""));
+        }
+    }
+    console.log("Playing random move");
+    return getRandomMove(board);
+};
+
+// 7674 (11 times)
+// 7822 (11 times)
+// 7690 (11 times)
+export const getWorstMove = (board, lookahead = 4) => {
+    const list = new Queue();
+
+    list.enqueue([null, null, board, 0]);
+    while (list.peek() !== undefined) {
+        const [originalMove, thisMove, thisBoard, movesAhead] = list.dequeue();
+
+        let boardAfterMove = board;
+        if (thisMove) {
+            boardAfterMove = playSimulatedMove(thisMove, thisBoard);
+            if (findGameEnd(boardAfterMove)) return originalMove;
+        }
+
+        if (movesAhead >= lookahead) continue;
+
+        const nextPossibleMoves = getMoves(thisBoard);
+
+        while (nextPossibleMoves.length) {
+            const move = nextPossibleMoves.pop();
+            list.enqueue([
+                originalMove ?? move,
+                move,
+                boardAfterMove,
+                movesAhead + 1,
+            ]);
         }
     }
     console.log("Playing random move");
