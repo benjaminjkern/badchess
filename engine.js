@@ -33,7 +33,7 @@ export const getRandomMove = (board) => {
     return moves[Math.floor(Math.random() * moves.length)];
 };
 
-export const getWorstMove = (boardState, lookahead = 6) => {
+export const getWorstMove = (boardState, lookahead = 4) => {
     const list = new Queue();
 
     list.enqueue([null, null, gridToString(boardState.board.grid), 0]);

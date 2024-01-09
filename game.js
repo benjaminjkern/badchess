@@ -87,6 +87,9 @@ export const validMove = (
     boardState,
     requireNoChecks = true
 ) => {
+    if (sx < 0 || sx >= GRID_SIZE || sy < 0 || sy >= GRID_SIZE) return;
+    if (tx < 0 || tx >= GRID_SIZE || ty < 0 || ty >= GRID_SIZE) return;
+
     const fromPiece = boardState.board.grid[sy][sx].piece;
     const toPiece = boardState.board.grid[ty][tx].piece;
 
@@ -177,23 +180,101 @@ export const validMove = (
 };
 
 export function* getMovesGenerator(boardState, requireNoChecks = true) {
-    for (let sx = 0; sx < GRID_SIZE; sx++) {
-        for (let sy = 0; sy < GRID_SIZE; sy++) {
-            if (
-                boardState.board.grid[sy][sx].piece === "" ||
-                boardState.board.grid[sy][sx].piece[0] !== boardState.turn
-            )
-                continue;
-            for (let tx = 0; tx < GRID_SIZE; tx++) {
-                for (let ty = 0; ty < GRID_SIZE; ty++) {
-                    if (
-                        validMove([sx, sy, tx, ty], boardState, requireNoChecks)
-                    )
-                        yield [sx, sy, tx, ty];
+    for (const {
+        piece,
+        pos: [sx, sy],
+    } of boardState.board.pieces) {
+        const pieceType = piece[1];
+        if (pieceType === "P") {
+            const dy = boardState.turn === "W" ? -1 : 1;
+            let move = [sx, sy, sx, sy + dy];
+            if (validMove(move, boardState, requireNoChecks)) yield move;
+            move = [sx, sy, sx, sy + 2 * dy];
+            if (validMove(move, boardState, requireNoChecks)) yield move;
+        } else if (pieceType === "N") {
+            for (let dx = -1; dx <= 1; dx += 2) {
+                for (let dy = -1; dy <= 1; dy += 2) {
+                    let move = [sx, sy, sx + dx, sy + 2 * dy];
+                    if (validMove(move, boardState, requireNoChecks))
+                        yield move;
+                    move = [sx, sy, sx + 2 * dx, sy + dy];
+                    if (validMove(move, boardState, requireNoChecks))
+                        yield move;
+                }
+            }
+        } else if (pieceType === "K") {
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const move = [sx, sy, sx + dx, sy + dy];
+                    if (validMove(move, boardState, requireNoChecks))
+                        yield move;
+                }
+            }
+        } else {
+            if (pieceType === "Q" || pieceType === "B") {
+                for (let dxy = -1; dxy <= 1; dxy += 2) {
+                    for (let dymx = -1; dymx <= 1; dymx += 2) {
+                        for (let s = 1; s <= GRID_SIZE; s++) {
+                            const tx = sx + dxy * s;
+                            const ty = sy + dymx * s;
+                            if (
+                                tx < 0 ||
+                                tx >= GRID_SIZE ||
+                                ty < 0 ||
+                                ty >= GRID_SIZE
+                            )
+                                continue;
+                            const move = [sx, sy, tx, ty];
+                            if (validMove(move, boardState, requireNoChecks))
+                                yield move;
+                            if (boardState.board.grid[ty][tx].piece !== "")
+                                break;
+                        }
+                    }
+                }
+            }
+            if (pieceType === "Q" || pieceType === "R") {
+                for (let dxy = -1; dxy <= 1; dxy += 2) {
+                    for (let dymx = -1; dymx <= 1; dymx += 2) {
+                        for (let s = 1; s <= GRID_SIZE; s++) {
+                            const tx = sx + ((dxy - dymx) / 2) * s;
+                            const ty = sy + ((dxy + dymx) / 2) * s;
+                            if (
+                                tx < 0 ||
+                                tx >= GRID_SIZE ||
+                                ty < 0 ||
+                                ty >= GRID_SIZE
+                            )
+                                continue;
+                            const move = [sx, sy, tx, ty];
+                            if (validMove(move, boardState, requireNoChecks))
+                                yield move;
+                            if (boardState.board.grid[ty][tx].piece !== "")
+                                break;
+                        }
+                    }
                 }
             }
         }
     }
+    // for (let sx = 0; sx < GRID_SIZE; sx++) {
+    //     for (let sy = 0; sy < GRID_SIZE; sy++) {
+    //         if (
+    //             boardState.board.grid[sy][sx].piece === "" ||
+    //             boardState.board.grid[sy][sx].piece[0] !== boardState.turn
+    //         )
+    //             continue;
+    //         for (let tx = 0; tx < GRID_SIZE; tx++) {
+    //             for (let ty = 0; ty < GRID_SIZE; ty++) {
+    //                 if (
+    //                     validMove([sx, sy, tx, ty], boardState, requireNoChecks)
+    //                 )
+    //                     yield [sx, sy, tx, ty];
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 export const getMoves = (boardState, requireNoChecks = true) => {

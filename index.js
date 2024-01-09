@@ -1,5 +1,5 @@
 import { drawBoard } from "./board.js";
-import { GRID_SIZE, SQUARE_SIZE, TOTAL_SIZE } from "./constants.js";
+import { SQUARE_SIZE, TOTAL_SIZE } from "./constants.js";
 import { getWorstMove } from "./engine.js";
 import { currentBoardState, drawCurrentBoard, playMove } from "./game.js";
 
@@ -32,7 +32,7 @@ window.onload = () => {
     //     for (let i = 0; i <= 10; i++) {
     //         console.log(i);
     //         const start = new Date().getTime();
-    //         getWorstMove(currentBoard);
+    //         getWorstMove(currentBoardState);
     //         time += new Date().getTime() - start;
     //     }
     //     console.log(time);
@@ -44,8 +44,6 @@ window.onload = () => {
 window.onclick = (e) => {
     const boardX = Math.floor(e.x / SQUARE_SIZE);
     const boardY = Math.floor(e.y / SQUARE_SIZE);
-    if (boardX < 0 || boardX >= GRID_SIZE || boardY < 0 || boardY >= GRID_SIZE)
-        return;
 
     if (!pieceSelected) {
         pieceSelected = [boardX, boardY];
