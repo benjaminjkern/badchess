@@ -2,12 +2,18 @@ import { drawBoard } from "./board.js";
 import { SQUARE_SIZE, TOTAL_SIZE, setSize } from "./constants.js";
 import { getWorstMove } from "./engine.js";
 import { currentBoardState, drawCurrentBoard, playMove } from "./game.js";
-
-let canvas, ctx;
+import { newImages } from "./pieces.js";
 
 let pieceSelected;
 
-const drawSelectedPiece = (ctx) => {
+const drawSelectedPiece = () => {
+    const canvas = document.getElementById("selectedpiece");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = TOTAL_SIZE;
+    canvas.height = TOTAL_SIZE;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     if (!pieceSelected) return;
 
     ctx.strokeStyle = "red";
@@ -21,13 +27,10 @@ const drawSelectedPiece = (ctx) => {
     ctx.stroke();
 };
 
-window.onload = () => {
-    canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
-
+window.onload = async () => {
     setSize(Math.min(window.innerWidth, window.innerHeight));
-    canvas.width = TOTAL_SIZE;
-    canvas.height = TOTAL_SIZE;
+
+    await newImages();
 
     // setTimeout(() => {
     //     let time = 0;
@@ -40,23 +43,30 @@ window.onload = () => {
     //     console.log(time);
     // }, 3000);
 
+    drawBoard();
     drawEverything();
-    playEngineMove();
+    // engineLoop();
 };
-window.onresize = () => {
+window.onresize = async () => {
     setSize(Math.min(window.innerWidth, window.innerHeight));
-    canvas.width = TOTAL_SIZE;
-    canvas.height = TOTAL_SIZE;
+
+    await newImages();
+    drawBoard();
     drawEverything();
 };
 
-const playEngineMove = () => {
+const doMove = (move) => {
+    const result = playMove(move);
+    if (result.draw) alert("DRAW");
+    if (result.winner) alert(result.winner + " WINS");
+    return !result.nextTurn;
+};
+
+const engineLoop = () => {
     setTimeout(() => {
-        const result = playMove(getWorstMove(currentBoardState));
-        if (result.draw) alert("DRAW");
-        if (result.winner) alert(result.winner + " WINS");
+        if (doMove(getWorstMove(currentBoardState))) return;
         drawEverything();
-        playEngineMove();
+        engineLoop();
     }, 3000);
 };
 
@@ -67,16 +77,18 @@ window.onclick = (e) => {
     if (!pieceSelected) {
         pieceSelected = [boardX, boardY];
     } else {
-        const result = playMove([...pieceSelected, boardX, boardY]);
-        if (result.draw) alert("DRAW");
-        if (result.winner) alert(result.winner + " WINS");
+        if (!doMove([...pieceSelected, boardX, boardY])) {
+            setTimeout(() => {
+                doMove(getWorstMove(currentBoardState));
+                drawEverything();
+            }, 1);
+        }
         pieceSelected = undefined;
     }
     drawEverything();
 };
 
 const drawEverything = () => {
-    drawBoard(ctx);
-    drawCurrentBoard(ctx);
-    drawSelectedPiece(ctx);
+    drawCurrentBoard();
+    drawSelectedPiece();
 };

@@ -3,8 +3,8 @@ import { drawBoardPieces, pieceStringToBoard } from "./pieces.js";
 
 export let currentBoardState = { board: pieceStringToBoard(), turn: "W" };
 
-export const drawCurrentBoard = (ctx) => {
-    drawBoardPieces(ctx, currentBoardState.board.pieces);
+export const drawCurrentBoard = () => {
+    drawBoardPieces(currentBoardState.board.pieces);
 };
 
 export const getNextTurn = (turn) => (turn === "W" ? "B" : "W");
