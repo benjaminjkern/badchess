@@ -61,7 +61,7 @@ export const getWorstMove = (boardState, lookahead = 0) => {
     let lookedAt = 0;
 
     while (true) {
-        if (lookedAt >= 1000000) break;
+        if (lookedAt >= 100000) break;
         lookedAt++;
         if (list.isEmpty()) {
             if (nextList.isEmpty()) break;

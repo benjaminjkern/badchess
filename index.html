@@ -5,7 +5,6 @@
     <style>
         body {
             margin: 0;
-            cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -17,18 +16,37 @@
             opacity: 0;
             font-size: 25vw;
             position: absolute;
-            transform: translateX(-50%) translateY(-50%);
             transition: opacity 1s ease-in-out;
             pointer-events: none;
+            animation: thinking 5s infinite linear;
         }
 
         canvas {
+            cursor: pointer;
             position: absolute;
             transform: translateX(-50%) translateY(-50%)
         }
 
         #wrapper {
             position: relative;
+        }
+
+        @keyframes thinking {
+            0% {
+                transform: translateX(-50%) translateY(-50%) rotate(0deg)
+            }
+
+            25% {
+                transform: translateX(-50%) translateY(-50%) rotate(-30deg)
+            }
+
+            75% {
+                transform: translateX(-50%) translateY(-50%) rotate(30deg)
+            }
+
+            100% {
+                transform: translateX(-50%) translateY(-50%) rotate(0deg)
+            }
         }
     </style>
     <title>Bad Chess</title>
