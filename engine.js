@@ -58,12 +58,18 @@ export const getWorstMove = (boardState, lookahead = 0) => {
 
     list.add([null, null, gridToString(boardState.board.grid), 0]);
 
-    let lookedAt = 0;
+    const start = new Date().getTime();
+
+    let movesahead = 0;
 
     while (true) {
-        lookedAt++;
+        if (new Date().getTime() - start > 10000) {
+            console.log("Time ran out");
+            break;
+        }
         if (list.isEmpty()) {
-            if (lookedAt < 10000 && nextList.isEmpty()) break;
+            if (nextList.isEmpty()) break;
+            movesahead++;
             list = nextList;
             nextList = randomListFrontier();
         }
@@ -81,10 +87,6 @@ export const getWorstMove = (boardState, lookahead = 0) => {
                 turn: currentTurn,
                 board: pieceStringToBoard(thisPieceString),
             };
-
-            if (Math.random() * 10000 < 1)
-                console.log(originalMove, thisMove, thisBoardState, movesAhead);
-
             boardAfterMove = playSimulatedMove(thisMove, thisBoardState);
             if (findGameEnd(boardAfterMove)) {
                 if (currentTurn !== boardState.turn) {
@@ -107,7 +109,7 @@ export const getWorstMove = (boardState, lookahead = 0) => {
 
         let move = nextPossibleMoves.next().value;
         while (move) {
-            (lookedAt < 100000 ? nextList : list).add([
+            nextList.add([
                 originalMove ?? move,
                 move,
                 gridToString(boardAfterMove.board.grid),
@@ -116,6 +118,6 @@ export const getWorstMove = (boardState, lookahead = 0) => {
             move = nextPossibleMoves.next().value;
         }
     }
-    console.log("Playing random move");
+    console.log("Playing random move after looking", movesahead, "moves ahead");
     return getRandomMove(boardState);
 };

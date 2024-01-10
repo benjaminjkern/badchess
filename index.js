@@ -89,7 +89,6 @@ const engineLoop = () => {
 };
 
 const onClick = (e) => {
-    event.preventDefault();
     const screenX = e.x ?? e.touches[0]?.clientX;
     const screenY = e.y ?? e.touches[0]?.clientY;
     if (thinking) return;

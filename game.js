@@ -108,7 +108,10 @@ export const validMove = (
                 !(
                     xDiff === 0 &&
                     // 6 is HARDCODED WONT WORK WITH DIFFERENT SIZED BOARDS
-                    (yDiff === -1 || (sy === 6 && yDiff === -2)) &&
+                    (yDiff === -1 ||
+                        (sy === 6 &&
+                            yDiff === -2 &&
+                            boardState.board.grid[5][sx].piece === "")) &&
                     toPiece === ""
                 ) &&
                 !(
@@ -123,7 +126,10 @@ export const validMove = (
                 !(
                     xDiff === 0 &&
                     // 1 is HARDCODED WONT WORK WITH DIFFERENT SIZED BOARDS
-                    (yDiff === 1 || (sy === 1 && yDiff === 2)) &&
+                    (yDiff === 1 ||
+                        (sy === 1 &&
+                            yDiff === 2 &&
+                            boardState.board.grid[2][sx].piece === "")) &&
                     toPiece === ""
                 ) &&
                 !(
@@ -188,6 +194,10 @@ export function* getMovesGenerator(boardState, requireNoChecks = true) {
         if (pieceType === "P") {
             const dy = boardState.turn === "W" ? -1 : 1;
             let move = [sx, sy, sx, sy + dy];
+            if (validMove(move, boardState, requireNoChecks)) yield move;
+            move = [sx, sy, sx + 1, sy + dy];
+            if (validMove(move, boardState, requireNoChecks)) yield move;
+            move = [sx, sy, sx - 1, sy + dy];
             if (validMove(move, boardState, requireNoChecks)) yield move;
             move = [sx, sy, sx, sy + 2 * dy];
             if (validMove(move, boardState, requireNoChecks)) yield move;
